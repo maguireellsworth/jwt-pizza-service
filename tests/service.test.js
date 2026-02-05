@@ -22,8 +22,7 @@ const { DB } = require('../src/database/database');
 const app = require('../src/service');
 
 // Global variables so its easier to set up tests
-const mockUser = { name: 'name', email: 'email@email', password: 'password123'};
-
+const mockUser = { name: 'name', email: 'email@email', password: 'password'};
 describe('base routes', () => {
     test('get docs', async () => {
         const docsRes = await request(app).get('/api/docs');
@@ -57,8 +56,18 @@ describe('auth router', () => {
             email: 'email@email',
             roles: [{role: 'diner'}],
         });
-        
+
+        DB.getUser.mockResolvedValue({
+        id: 1,
+        name: 'Test User',
+        email: 'test@email.com',
+        roles: [{ role: 'diner' }],
+        password: undefined,
+        });
+
         DB.loginUser.mockResolvedValue();
+
+        
     })
 
     test('creates a new user', async () => {
@@ -84,5 +93,17 @@ describe('auth router', () => {
         
             expect(response.status).toBe(400);
             expect(DB.addUser).not.toHaveBeenCalled();
+    })
+
+    test('logs in a user', async () => {
+        const response = await request(app)
+            .put('/api/auth')
+            .send({email: 'email@email', password: 'password'});
+
+            console.log(response.body)
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('user');
+            expect(response.body).toHaveProperty('token', 'fake-jwt-token')
     })
 })
