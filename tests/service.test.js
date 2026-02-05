@@ -2,6 +2,7 @@
 const request = require('supertest');
 const app = require('../src/service');
 const { resetDb } = require('./helpers/resetDB')
+const { Role, DB } = require('../src/database/database.js');
 
 // Global variables so its easier to set up tests
 const mockUser = { name: 'name', email: 'email@email', password: 'password'};
@@ -68,6 +69,51 @@ describe('auth router', () => {
     })
 })
 
+describe('franchise router', () => {
+    let token;
+    let admin_u;
+    beforeAll(async () => {
+        await resetDb();
+        admin_u = await createAdminUser();
+
+        const login = await request(app)
+            .put('/api/auth')
+            .send({email: admin_u.email, password: admin_u.password});
+        
+        expect(login.status).toBe(200);
+        expectValidJwt(login.body.token);
+        token = login.body.token;
+    })
+
+    test('creates a franchise', async () => {
+        const response = await request(app)
+            .post('/api/franchise')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                name: 'testFranchise',
+                admins: [{email: admin_u.email}]
+            });
+
+        if(response.status != 200){
+            console.log(response.body);
+        }
+        expect(response.status).toBe(200);
+    })
+})
+
 function expectValidJwt(potentialJwt) {
   expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
+}
+
+async function createAdminUser() {
+  let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
+  user.name = randomName();
+  user.email = user.name + '@admin.com';
+
+  user = await DB.addUser(user);
+  return { ...user, password: 'toomanysecrets' };
+}
+
+function randomName() {
+    return Math.random().toString(36).substring(2, 12)
 }
