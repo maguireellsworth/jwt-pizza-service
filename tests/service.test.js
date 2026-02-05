@@ -20,6 +20,7 @@ jest.mock('../src/database/database', () => ({
 const request = require('supertest');
 const { DB } = require('../src/database/database');
 const app = require('../src/service');
+const jwt = require('jsonwebtoken');
 
 // Global variables so its easier to set up tests
 const mockUser = { name: 'name', email: 'email@email', password: 'password'};
@@ -100,10 +101,36 @@ describe('auth router', () => {
             .put('/api/auth')
             .send({email: 'email@email', password: 'password'});
 
-            console.log(response.body)
+        // console.log(response.body)
 
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('user');
-            expect(response.body).toHaveProperty('token', 'fake-jwt-token')
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('user');
+        expect(response.body).toHaveProperty('token', 'fake-jwt-token')
     })
+
+    test('logs out user', async () => {
+        DB.isLoggedIn.mockResolvedValue(true);
+        jwt.verify.mockReturnValue({
+        id: 1,
+        email: 'email@email',
+        roles: [{ role: 'diner' }],
+        });
+
+        DB.logoutUser.mockResolvedValue();
+
+        const res = await request(app)
+        .delete('/api/auth')
+        .set('Authorization', 'Bearer abc.def.ghi');
+
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('message', 'logout successful');
+
+        // clearAuth() uses readAuthToken -> extracts the token -> calls DB.logoutUser(token)
+        expect(DB.logoutUser).toHaveBeenCalledTimes(1);
+        expect(DB.logoutUser).toHaveBeenCalledWith('abc.def.ghi');
+  });
+})
+
+describe('franchise router', () => {
+    test('')
 })
