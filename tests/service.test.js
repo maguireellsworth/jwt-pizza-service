@@ -1,6 +1,5 @@
 // Then import mocked stuff
 const request = require('supertest');
-const { DB } = require('../src/database/database');
 const app = require('../src/service');
 
 // Global variables so its easier to set up tests
@@ -29,8 +28,9 @@ describe('base routes', () => {
 
 // Auth Router test
 describe('auth router', () => {
-    beforeEach(async () => {
-
+    let token;
+    beforeAll(async () => {
+        // TODO: reset the database;
     })
 
     test('registers a new user', async () => {
@@ -51,6 +51,16 @@ describe('auth router', () => {
         
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('token');
+        token = response.body.token;
+    })
+
+    test('logs out a logged in user', async () => {
+        const response = await request(app)
+            .delete('/api/auth')
+            .set('Authorization', 'Bearer ${token}')
+
+        expect(response.status).toBe(200);
+        expect(logout.body).toEqual({message: 'logout successful'})
     })
 })
 
