@@ -29,7 +29,29 @@ describe('base routes', () => {
 
 // Auth Router test
 describe('auth router', () => {
-    
+    beforeEach(async () => {
+
+    })
+
+    test('registers a new user', async () => {
+        const response = await request(app)
+            .post('/api/auth')
+            .send({name: 'Alice', email: 'alice@test.com', password: "password"});
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('user');
+        expect(response.body.user).toHaveProperty('email', 'alice@test.com');
+        expect(response.body).toHaveProperty('token');
+    });
+
+    test('logins in an existing user', async () => {
+        const response = await request(app)
+            .put('/api/auth')
+            .send({email: 'alice@test.com', password: 'password'});
+        
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('token');
+    })
 })
 
 // describe('franchise router', () => {
