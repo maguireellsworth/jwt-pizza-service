@@ -99,6 +99,24 @@ describe('franchise router', () => {
         }
         expect(response.status).toBe(200);
     })
+
+    test('gets user franchises', async () => {
+        const response = await request(app)
+            .get(`/api/franchise/${admin_u.id}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send()
+
+
+        if(response.status != 200){
+            console.log(response.body);
+        }
+        expect(response.status).toBe(200);
+        const franchise = response.body[0];
+        expect(franchise).toHaveProperty('id');
+        expect(franchise).toHaveProperty('name', 'testFranchise');
+        expect(franchise).toHaveProperty('admins');
+        expect(franchise).toHaveProperty('stores');
+    })
 })
 
 function expectValidJwt(potentialJwt) {
