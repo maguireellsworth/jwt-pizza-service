@@ -1,6 +1,7 @@
 // Then import mocked stuff
 const request = require('supertest');
 const app = require('../src/service');
+const { resetDb } = require('./helpers/resetDB')
 
 // Global variables so its easier to set up tests
 const mockUser = { name: 'name', email: 'email@email', password: 'password'};
@@ -30,7 +31,7 @@ describe('base routes', () => {
 describe('auth router', () => {
     let token;
     beforeAll(async () => {
-        // TODO: reset the database;
+        await resetDb();
     })
 
     test('registers a new user', async () => {
@@ -42,6 +43,7 @@ describe('auth router', () => {
         expect(response.body).toHaveProperty('user');
         expect(response.body.user).toHaveProperty('email', 'alice@test.com');
         expect(response.body).toHaveProperty('token');
+        expectValidJwt(response.body.token);
     });
 
     test('logins in an existing user', async () => {
@@ -51,19 +53,21 @@ describe('auth router', () => {
         
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('token');
+        expectValidJwt(response.body.token)
         token = response.body.token;
     })
 
     test('logs out a logged in user', async () => {
+        expect(token).toBeTruthy();
         const response = await request(app)
             .delete('/api/auth')
-            .set('Authorization', 'Bearer ${token}')
+            .set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(200);
-        expect(logout.body).toEqual({message: 'logout successful'})
+        expect(response.body).toEqual({message: 'logout successful'})
     })
 })
 
-// describe('franchise router', () => {
- 
-// })
+function expectValidJwt(potentialJwt) {
+  expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
+}
