@@ -1,24 +1,28 @@
 // Mock Everything that needs mocking
+jest.mock('jsonwebtoken', () => ({
+    sign: jest.fn(() => 'fake-jwt-token'),
+    verify: jest.fn(),
+}))
+
 jest.mock('../src/database/database', () => ({
-    addUser: jest.fn(),
+    Role: { Diner: 'diner'},
+    DB: {
+        addUser: jest.fn(),
+        loginUser: jest.fn(),
+        getUser: jest.fn(),
+        logoutUser: jest.fn(),
+        isLoggedIn: jest.fn(),
+    }
 }));
 
-jest.mock('../src/routes/authRouter', () => {
-    const real = jest.requireActual('../src/routes/authRouter');
-    return {
-        ...real,
-        setAuth: jest.fn(),
-    };
-});
 
 // Then import mocked stuff
 const request = require('supertest');
-const DB = require('../src/database/database');
-const { setAuth } = require('../src/routes/authRouter');
+const { DB } = require('../src/database/database');
 const app = require('../src/service');
 
 // Global variables so its easier to set up tests
-const mockUser = { name: 'name', email: 'email', password: 'password'};
+const mockUser = { name: 'name', email: 'email@email', password: 'password123'};
 
 describe('base routes', () => {
     test('get docs', async () => {
@@ -44,15 +48,32 @@ describe('base routes', () => {
 
 // Auth Router test
 describe('auth router', () => {
-    beforeAll(() => {
-        DB.addUser.mockResolvedValue(mockUser);
-        setAuth.mockResolvedValue('fake-jwt-token');
+    beforeEach(() => {
+        jest.clearAllMocks();
+
+        DB.addUser.mockResolvedValue({
+            id: 1,
+            name: 'name',
+            email: 'email@email',
+            roles: [{role: 'diner'}],
+        });
+        
+        DB.loginUser.mockResolvedValue();
     })
 
     test('creates a new user', async () => {
         const response = await request(app)
             .post('/api/auth')
             .send(mockUser);
+
+        if(response.status != 200){
+            console.log(response.status, response.body);
+        }
+        expect(response.status).toBe(200);
+
+        expect(response.body).toHaveProperty('user');
+        expect(response.body).toHaveProperty('token', 'fake-jwt-token');
+        expect(response.body.user).toHaveProperty('email', 'email@email')
         
     })
 
