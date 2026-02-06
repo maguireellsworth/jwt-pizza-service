@@ -254,6 +254,36 @@ describe('order router', () => {
     })
 })
 
+describe('user router', () => {
+    let admin_u;
+    let token;
+    beforeAll(async () => {
+        await resetDb();
+        admin_u = await createAdminUser();
+
+        const login = await request(app)
+            .put('/api/auth')
+            .send({email: admin_u.email, password: admin_u.password});
+        
+        expect(login.status).toBe(200);
+        expectValidJwt(login.body.token);
+        token = login.body.token;
+    })
+
+    test('gets a user', async () => {
+        const response = await request(app)
+            .get('/api/user/me')
+            .set('Authorization', `Bearer ${token}`)
+            .send()
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('id');
+        expect(response.body).toHaveProperty('name');
+        expect(response.body).toHaveProperty('email');
+    })
+
+
+})
+
 function expectValidJwt(potentialJwt) {
   expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
 }
