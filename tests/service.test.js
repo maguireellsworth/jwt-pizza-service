@@ -72,7 +72,8 @@ describe('auth router', () => {
 describe('franchise router', () => {
     let token;
     let admin_u;
-    let franchiseid;
+    let franchiseId;
+    let storeId;
     beforeAll(async () => {
         await resetDb();
         admin_u = await createAdminUser();
@@ -114,7 +115,7 @@ describe('franchise router', () => {
         expect(response.status).toBe(200);
         const franchise = response.body[0];
         expect(franchise).toHaveProperty('id');
-        franchiseid = franchise.id;
+        franchiseId = franchise.id;
         expect(franchise).toHaveProperty('name', 'testFranchise');
         expect(franchise).toHaveProperty('admins');
         expect(franchise).toHaveProperty('stores');
@@ -154,13 +155,20 @@ describe('franchise router', () => {
         }
         expect(createStore.status).toBe(200);
         expect(createStore.body).toHaveProperty('id');
+        storeId = createStore.body.id;
         expect(createStore.body).toHaveProperty('franchiseId');
         expect(createStore.body).toHaveProperty('name');
     })
 
-    // test('deletes an existing store from an existing franchise', async () => {
-    //     const response
-    // })
+    test('deletes an existing store from an existing franchise', async () => {
+        const response = await request(app)
+            .delete(`/api/franchise/${franchiseId}/store/${storeId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send()
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({message: 'store deleted'});
+    })
 })
 
 function expectValidJwt(potentialJwt) {
