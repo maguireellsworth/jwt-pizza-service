@@ -174,6 +174,7 @@ describe('franchise router', () => {
 describe('order router', () => {
     let token;
     let admin_u;
+    let menuId;
     beforeAll(async () => {
         await resetDb();
         admin_u = await createAdminUser();
@@ -198,12 +199,10 @@ describe('order router', () => {
                 price: 42
             })
 
-        if(response.status != 200){
-            console.log(response.body);
-        }
         expect(response.status).toBe(200);
         const menu = response.body;
         expect(menu[0]).toHaveProperty('id');
+        menuId = menu[0].id;
         expect(menu[0]).toHaveProperty('title');
         expect(menu[0]).toHaveProperty('description');
     })
@@ -217,6 +216,41 @@ describe('order router', () => {
         expect(response.body).toHaveProperty('dinerId');
         expect(response.body).toHaveProperty('orders');
         expect(response.body).toHaveProperty('page')
+    })
+
+    test('creates orders', async () => {
+        const createFran = await request(app)
+            .post('/api/franchise')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                name: 'storeFranchise',
+                admins: [{email: admin_u.email}]
+            });
+        expect(createFran.status).toBe(200);
+        const franId = createFran.body.id;
+
+        const createStore = await request(app)
+            .post(`/api/franchise/${franId}/store`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({name: 'testStore'})
+        expect(createStore.status).toBe(200)
+        const storeId = createStore.body.id;
+            
+
+        const response = await request(app)
+            .post('/api/order')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                franchiseId: franId,
+                storeId: storeId,
+                items: [{
+                    menuId: menuId,
+                    description: 'testBorgorDescription',
+                    price: 42
+                }]
+            })
+
+        expect(response.status).toBe(200);
     })
 })
 
