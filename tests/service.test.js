@@ -72,6 +72,7 @@ describe('auth router', () => {
 describe('franchise router', () => {
     let token;
     let admin_u;
+    let franchiseid;
     beforeAll(async () => {
         await resetDb();
         admin_u = await createAdminUser();
@@ -113,9 +114,45 @@ describe('franchise router', () => {
         expect(response.status).toBe(200);
         const franchise = response.body[0];
         expect(franchise).toHaveProperty('id');
+        franchiseid = franchise.id;
         expect(franchise).toHaveProperty('name', 'testFranchise');
         expect(franchise).toHaveProperty('admins');
         expect(franchise).toHaveProperty('stores');
+    });
+
+    test('deletes a franchise', async () => {
+        const response = await request(app)
+            .delete('/api/franchise/1')
+            .set('Authorization', `Bearer ${token}`)
+            .send();
+
+        if(response.status != 200){
+            console.log(response.body)
+        }
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({message: 'franchise deleted'})
+    })
+
+    test('creates a new store under a franchise', async () => {
+        const createFran = await request(app)
+            .post('/api/franchise')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                name: 'storeFranchise',
+                admins: [{email: admin_u.email}]
+            });
+        expect(createFran.status).toBe(200);
+        const franid = createFran.body.id;
+
+        const createStore = await request(app)
+            .post(`/api/franchise/${franid}/store`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({name: 'testStore'})
+
+        if(createStore.status != 200){
+            console.log(createStore.body);
+        }
+        expect(createStore.status).toBe(200);
     })
 })
 
