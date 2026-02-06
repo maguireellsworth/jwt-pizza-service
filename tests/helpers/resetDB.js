@@ -9,6 +9,7 @@ async function resetDb() {
     await conn.execute('DELETE FROM user');
     await conn.execute('DELETE FROM store');
     await conn.execute('DELETE FROM franchise');
+    await conn.execute('DELETE FROM orderItem')
   } finally {
     await conn.end();
   }
