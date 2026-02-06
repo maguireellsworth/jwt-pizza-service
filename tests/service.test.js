@@ -207,6 +207,17 @@ describe('order router', () => {
         expect(menu[0]).toHaveProperty('title');
         expect(menu[0]).toHaveProperty('description');
     })
+
+    test('gets orders', async () => {
+        const response = await request(app)
+            .get('/api/order')
+            .set('Authorization', `Bearer ${token}`)
+            .send()
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('dinerId');
+        expect(response.body).toHaveProperty('orders');
+        expect(response.body).toHaveProperty('page')
+    })
 })
 
 function expectValidJwt(potentialJwt) {
