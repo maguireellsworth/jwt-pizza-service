@@ -1,6 +1,7 @@
 const { DB } = require('../../src/database/database.js');
 
 async function resetDb() {
+  await DB.initialized;
   const conn = await DB._getConnection(true); // uses configured test DB
   try {
     // Order matters if you have foreign keys
