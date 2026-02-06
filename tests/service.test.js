@@ -171,6 +171,44 @@ describe('franchise router', () => {
     })
 })
 
+describe('order router', () => {
+    let token;
+    let admin_u;
+    beforeAll(async () => {
+        await resetDb();
+        admin_u = await createAdminUser();
+
+        const login = await request(app)
+            .put('/api/auth')
+            .send({email: admin_u.email, password: admin_u.password});
+        
+        expect(login.status).toBe(200);
+        expectValidJwt(login.body.token);
+        token = login.body.token;
+    })
+
+    test('adds a menu item', async () => {
+        const response = await request(app)
+            .put('/api/order/menu')
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                title: 'testBorgor',
+                description: 'testBorgorDescription',
+                image: "testImage",
+                price: 42
+            })
+
+        if(response.status != 200){
+            console.log(response.body);
+        }
+        expect(response.status).toBe(200);
+        const menu = response.body;
+        expect(menu[0]).toHaveProperty('id');
+        expect(menu[0]).toHaveProperty('title');
+        expect(menu[0]).toHaveProperty('description');
+    })
+})
+
 function expectValidJwt(potentialJwt) {
   expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
 }
