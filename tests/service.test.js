@@ -5,7 +5,6 @@ const { resetDb } = require('./helpers/resetDB')
 const { Role, DB } = require('../src/database/database.js');
 
 // Global variables so its easier to set up tests
-const mockUser = { name: 'name', email: 'email@email', password: 'password'};
 describe('base routes', () => {
     test('get docs', async () => {
         const docsRes = await request(app).get('/api/docs');
