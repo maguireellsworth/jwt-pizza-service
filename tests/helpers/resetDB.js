@@ -11,6 +11,7 @@ async function resetDb() {
     await conn.execute('DELETE FROM franchise');
     await conn.execute('DELETE FROM orderItem');
     await conn.execute('DELETE FROM menu');
+    await conn.execute('DELETE FROM dinerOrder');
   } finally {
     await conn.end();
   }
