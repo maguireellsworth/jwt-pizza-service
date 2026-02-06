@@ -153,7 +153,14 @@ describe('franchise router', () => {
             console.log(createStore.body);
         }
         expect(createStore.status).toBe(200);
+        expect(createStore.body).toHaveProperty('id');
+        expect(createStore.body).toHaveProperty('franchiseId');
+        expect(createStore.body).toHaveProperty('name');
     })
+
+    // test('deletes an existing store from an existing franchise', async () => {
+    //     const response
+    // })
 })
 
 function expectValidJwt(potentialJwt) {
