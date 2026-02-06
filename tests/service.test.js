@@ -281,7 +281,18 @@ describe('user router', () => {
         expect(response.body).toHaveProperty('email');
     })
 
+    test('updates a user', async () => {
+        const response = await request(app)
+            .put(`/api/user/${admin_u.id}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                email: 'new@email.com'
+            })
 
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('user');
+        expect(response.body.user).toHaveProperty('id');
+    })
 })
 
 function expectValidJwt(potentialJwt) {
