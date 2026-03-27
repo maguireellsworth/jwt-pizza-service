@@ -2,6 +2,9 @@ const config = require('./config');
 
 class Logger {
   httpLogger = (req, res, next) => {
+    if(req.originalUrl === '/api/docs') {
+        return next();
+    }
     const originalSend = res.send.bind(res);
 
     res.send = (body) => {
