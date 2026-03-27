@@ -49,6 +49,17 @@ app.use('*', (req, res) => {
 
 // Default error handler for all exceptions and errors.
 app.use((err, req, res, next) => {
+  const statusCode = err.statusCode ?? 500;
+  logger.log(statusCode >= 500 ? 'error' : 'warn', 'error', {
+    method: req.method,
+    path: req.originalUrl,
+    statusCode,
+    authorized: !!req.headers.authorization,
+    message: err.message,
+    stack: err.stack,
+    reqBody: req.body,
+  })
+  
   res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack });
   next();
 });
