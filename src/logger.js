@@ -100,12 +100,12 @@ class Logger {
   sendLogToGrafana(event) {
     const body = JSON.stringify(event);
 
-    fetch(config.logging.endpointURL, {
+    fetch(config.logging.endpointUrl, {
       method: 'POST',
       body,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.logging.accountID}:${config.logging.apiKey}`,
+        Authorization: `Bearer ${config.logging.accountId}:${config.logging.apiKey}`,
       },
     }).then(async (res) => {
       if (!res.ok) {
