@@ -85,7 +85,7 @@ class Logger {
       for (const [key, val] of Object.entries(value)) {
         if (key.toLowerCase().includes('password')) {
           copy[key] = '*****';
-        } else if (key.toLowerCase().includes('token') || key.toLowerCase() === 'authorization') {
+        } else if (key.toLowerCase().includes('token') || key.toLowerCase() === 'authorization' || key.toLowerCase() === 'jwt') {
           copy[key] = '*****';
         } else {
           copy[key] = this.redact(val);

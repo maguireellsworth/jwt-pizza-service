@@ -3,6 +3,7 @@ const config = require('../config.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
+const logger = require('../logger.js')
 
 const orderRouter = express.Router();
 
@@ -79,21 +80,25 @@ orderRouter.post(
   asyncHandler(async (req, res) => {
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
-    factoryReq = { diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }
+    const factoryReq = { diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }
     const r = await fetch(`${config.factory.url}/api/order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
       body: JSON.stringify(factoryReq),
     });
     const j = await r.json();
+    const safeResBody = {...j}
+    if(safeResBody.jwt){
+      safeResBody.jwt = '******';
+    }
 
     logger.log(r.ok ? 'info' : 'warn', 'factory', {
       method: req.method,
       path: req.originalUrl,
-      statusCode: j.statusCode,
+      statusCode: r.status,
       authorized: !!req.headers.authorization,
-      reqBody: factoryReq,
-      resBody: j
+      reqBody: JSON.stringify(factoryReq),
+      resBody: JSON.stringify(safeResBody)
     })
 
     if (r.ok) {
