@@ -226,5 +226,7 @@ class MetricsTracker {
 
 // module.exports = MetricsTracker
 const metrics = new MetricsTracker(config, 5000);
-metrics.start();
+if(process.env.NODE_ENV !== 'test'){
+  metrics.start();
+}
 module.exports = metrics
