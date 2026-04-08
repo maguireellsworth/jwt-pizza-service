@@ -4,6 +4,7 @@ const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 const logger = require('../logger.js')
+const metricTracker = require('../metrics.js')
 
 const orderRouter = express.Router();
 
@@ -102,8 +103,10 @@ orderRouter.post(
     })
 
     if (r.ok) {
+      metricTracker.orderSuccess();
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
+      metricTracker.orderFailure();
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
   })
