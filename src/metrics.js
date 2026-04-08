@@ -176,7 +176,7 @@ class MetricsTracker {
     };
 
     try {
-      const response = await fetch(this.config.metrics.endpointURL, {
+      const response = await fetch(this.config.metrics.endpointUrl, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
