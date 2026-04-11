@@ -82,6 +82,7 @@ userRouter.get(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    
     const page = Number.parseInt(req.query.page ?? '0', 10);
     const limit = Number.parseInt(req.query.limit ?? '10', 10);
     const name = String(req.query.name ?? '*');
